@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/user"
@@ -15,9 +16,10 @@ import (
 	"github.com/tzneal/ham-go/cmd/termlog/ui"
 	"github.com/tzneal/ham-go/rig"
 
-	"github.com/BurntSushi/toml"
+	//"github.com/BurntSushi/toml"
 	"github.com/dh1tw/goHamlib"
 	"github.com/go-git/go-git/v5"
+	"github.com/pelletier/go-toml"
 
 	"github.com/tzneal/ham-go"
 	"github.com/tzneal/ham-go/adif"
@@ -67,7 +69,12 @@ have occurred *after* the oldest record in the current logfile`)
 	*config = expandPath(*config)
 
 	// load our config file
-	_, err := toml.DecodeFile(*config, cfg)
+	//_, err := toml.DecodeFile(*config, cfg)
+	b, err := ioutil.ReadFile(*config) // just pass the file name
+	if err != nil {
+		log.Fatalf("unable to read config file %s: %s", *config, err)
+	}
+	err = toml.Unmarshal(b, cfg)
 	if err != nil {
 		if !ham.FileOrDirectoryExists(*config) {
 			if err = cfg.SaveAs(*config); err != nil {
